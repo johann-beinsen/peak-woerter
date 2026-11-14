@@ -12,6 +12,7 @@ import { Wortjagd } from "../_games/Wortjagd";
 import { Quartett } from "../_games/Quartett";
 import { Bedeutung } from "../_games/Bedeutung";
 import { Sudoku } from "../_games/Sudoku";
+import { Pfad } from "../_games/Pfad";
 import { GroupResults } from "../_games/GroupResults";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ const NEEDS: Record<string, string> = {
   quartett: "Dafür braucht es vier Kategorien mit je mindestens vier eigenen Wörtern.",
   bedeutung: "Dafür braucht es mindestens fünf Wörter mit Bedeutung.",
   sudoku: "Dafür braucht es ein Wort mit 4 oder 6 verschiedenen Buchstaben.",
+  pfad: "Dafür braucht das Archiv mindestens ein Wort.",
 };
 
 export default async function PuzzlePage({ params }: { params: Promise<{ game: string }> }) {
@@ -53,8 +55,10 @@ export default async function PuzzlePage({ params }: { params: Promise<{ game: s
         <Quartett initial={play as never} day={day} />
       ) : game === "bedeutung" ? (
         <Bedeutung initial={play as never} day={day} />
-      ) : (
+      ) : game === "sudoku" ? (
         <Sudoku initial={play as never} day={day} />
+      ) : (
+        <Pfad initial={play as never} day={day} serverNow={Date.now()} />
       )}
       {play && <GroupResults rows={group} me={v.id} done={play.finished} />}
     </div>
