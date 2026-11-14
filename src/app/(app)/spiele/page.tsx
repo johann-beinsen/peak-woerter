@@ -13,7 +13,7 @@ import { PushToggle } from "@/components/PushToggle";
 export const metadata: Metadata = { title: "Minispiele", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-const BAND: Record<PuzzleKey, string> = { wortjagd: "band-grass", quartett: "band-cobalt", bedeutung: "band-magenta", sudoku: "band-sun" };
+const BAND: Record<PuzzleKey, string> = { wortjagd: "band-grass", quartett: "band-cobalt", bedeutung: "band-magenta", sudoku: "band-sun", pfad: "band-teal" };
 
 export default async function Spiele() {
   const v = await requireMemberPage();

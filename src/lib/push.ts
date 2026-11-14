@@ -93,7 +93,7 @@ export async function dailyPuzzlePush(db: Db, prepare: (day: string) => Promise<
     WHERE app_setting.value IS DISTINCT FROM EXCLUDED.value`;
   if (!claimed) return false;
   await prepare(day);
-  await sendPush(db, { title: PUSH_KINDS.raetsel.title, body: "Wortjagd, Quartett, Echt oder erfunden? und Sudoku warten auf dich.", url: "/spiele", tag: `raetsel-${day}` }, undefined, "raetsel");
+  await sendPush(db, { title: PUSH_KINDS.raetsel.title, body: "Wortjagd, Quartett, Echt oder erfunden?, Sudoku und Pfad warten auf dich.", url: "/spiele", tag: `raetsel-${day}` }, undefined, "raetsel");
   return true;
 }
 

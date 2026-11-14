@@ -1,10 +1,11 @@
 import { bedeutung } from "./bedeutung";
+import { pfad } from "./pfad";
 import { quartett } from "./quartett";
 import { sudoku } from "./sudoku";
 import { wortjagd } from "./wortjagd";
 import type { PuzzleKind } from "./types";
 
-export const PUZZLES = { wortjagd, quartett, bedeutung, sudoku } as const;
+export const PUZZLES = { wortjagd, quartett, bedeutung, sudoku, pfad } as const;
 export type PuzzleKey = keyof typeof PUZZLES;
 export type PuzzleView<K extends PuzzleKey> = ReturnType<(typeof PUZZLES)[K]["view"]>;
 

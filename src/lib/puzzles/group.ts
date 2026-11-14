@@ -23,6 +23,7 @@ export function resultLabel(game: PuzzleKey, p: PlayFacts): string {
     case "bedeutung":
       return `${p.score ?? 0}/${QUESTIONS} richtig`;
     case "sudoku":
+    case "pfad":
       return p.won && p.durationMs !== null ? clock(p.durationMs) : "gelöst";
   }
 }
@@ -31,7 +32,7 @@ export function resultLabel(game: PuzzleKey, p: PlayFacts): string {
 export function compareResults(game: PuzzleKey, a: PlayFacts, b: PlayFacts) {
   if (a.finished !== b.finished) return a.finished ? -1 : 1;
   if (a.won !== b.won) return a.won ? -1 : 1;
-  const value = (p: PlayFacts) => (game === "bedeutung" ? -(p.score ?? 0) : game === "sudoku" ? (p.durationMs ?? Infinity) : (p.score ?? Infinity));
+  const value = (p: PlayFacts) => (game === "bedeutung" ? -(p.score ?? 0) : game === "sudoku" || game === "pfad" ? (p.durationMs ?? Infinity) : (p.score ?? Infinity));
   return value(a) - value(b) || a.updatedAt.getTime() - b.updatedAt.getTime();
 }
 

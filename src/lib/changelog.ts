@@ -10,6 +10,14 @@ export type Release = { version: string; date: string; items: ChangeItem[] };
 
 export const CHANGELOG: Release[] = [
   {
+    version: "1.3.0",
+    date: "2026-11-14",
+    items: [
+      { title: "Neues Rätsel: Pfad", text: "Verbinde die Zahlen der Reihe nach mit einer Linie, die jedes Feld genau einmal besucht. Jeden Tag ein neues Gitter, die Zeit läuft.", href: "/spiele/pfad" },
+      { title: "Wer war am schnellsten?", text: "Unter dem Pfad steht nach dem Lösen die Rangliste des Tages, sortiert nach Zeit." },
+    ],
+  },
+  {
     version: "1.2.1",
     date: "2026-11-06",
     items: [{ title: "Startseite aufgeräumt", text: "Unter der Begrüßung kommen wieder zuerst Suche, Wort des Tages und Neues. Die Abstimmungen stehen darunter.", href: "/" }],
