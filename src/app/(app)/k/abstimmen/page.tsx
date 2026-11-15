@@ -36,7 +36,7 @@ export default async function Abstimmen() {
     const card = toCard({ ...w, acceptedAt: null }, { showUnverified: true, bandLabel: KIND_LABEL[r.kind] });
     card.cardNumber = w.cardNumber;
     card.values = [
-      ...(card.values ?? []).filter(([k]) => k === "Buchstaben" || k === "Bedeutungen"),
+      ...(card.values ?? []).filter(([k]) => k === "Buchstaben" || k === "Wörter" || k === "Bedeutungen"),
       ["Runde", r.number],
       ["Eingereicht", formatDate(w.createdAt, { day: "numeric", month: "short" })],
     ];

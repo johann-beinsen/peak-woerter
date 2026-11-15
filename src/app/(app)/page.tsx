@@ -47,11 +47,11 @@ export default async function Home() {
         </form>
         <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
           <Link href="/woerter" className="hover:text-ink">
-            <span className="tabular font-bold text-ink">{total}</span> {total === 1 ? "Wort" : "Wörter"}
+            <span className="tabular font-bold text-ink">{total}</span> {total === 1 ? "Eintrag" : "Einträge"}
           </Link>
           {total > 0 && (
             <Link href="/zufall" className="inline-flex items-center gap-1.5 font-semibold text-ink hover:underline">
-              <Shuffle size={15} aria-hidden /> Zufälliges Wort
+              <Shuffle size={15} aria-hidden /> Zufälliger Eintrag
             </Link>
           )}
         </p>

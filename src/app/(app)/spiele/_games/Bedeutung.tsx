@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { headlineSize } from "@/lib/text";
 import { Check, X } from "lucide-react";
 import type { PlayResult } from "@/lib/puzzles/play";
 import { dayLabel, MoveError, ShareButton, useMove } from "./common";
@@ -28,7 +29,7 @@ export function Bedeutung({ initial, day }: { initial: PlayResult<"bedeutung">; 
             <p className="condensed flex h-8 items-center px-5 text-[0.72rem] font-extrabold uppercase tracking-[0.08em]" style={{ background: "var(--band)", color: "var(--band-ink)" }}>
               Was bedeutet
             </p>
-            <p className="display px-5 py-5 text-[2.4rem] text-[var(--card-ink)]">{v.current.term}</p>
+            <p className="display px-5 py-5 text-[var(--card-ink)]" style={{ fontSize: headlineSize(v.current.term, 2.4, 1.4) }}>{v.current.term}</p>
           </div>
           <ul className="mt-4 space-y-2">
             {v.current.options.map((o, i) => (

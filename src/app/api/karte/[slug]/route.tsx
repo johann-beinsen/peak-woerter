@@ -44,7 +44,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const example = og ? null : w.examples[0]?.text;
   // Fit the longest word of the term into the card width (~0.6em per glyph in the default font).
   const longest = Math.max(...w.term.split(/\s+/).map((p) => p.length), 4);
-  const termSize = Math.floor(Math.min(og ? 120 : 150, (og ? 1040 : 840) / (longest * 0.6)));
+  const boxW = og ? 1040 : 840;
+  const boxH = og ? 230 : 520; // sayings wrap over several lines: fit the whole text into this box
+  const termSize = Math.floor(Math.max(36, Math.min(og ? 120 : 150, boxW / (longest * 0.6), Math.sqrt((boxW * boxH) / (w.term.length * 0.6 * 1.05)))));
   const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
 
   return new ImageResponse(

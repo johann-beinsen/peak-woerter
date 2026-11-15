@@ -87,7 +87,7 @@ export default async function Profil({ params }: { params: Promise<{ id: string 
   ]);
   const fav = u.favoriteWord?.isPublic ? u.favoriteWord : null;
   const counts: [number, string][] = [
-    [words.length, words.length === 1 ? "Wort" : "Wörter"],
+    [words.length, words.length === 1 ? "Eintrag" : "Einträge"],
     [s.submitted, "eingereicht"],
     [s.gameWins, s.gameWins === 1 ? "Sieg" : "Siege"],
   ];

@@ -21,7 +21,7 @@ const ENTRY = {
 /** The saved entry as plain text for the prompt; null when nothing is filled in yet. */
 function entryText(w: Prisma.WordGetPayload<{ include: typeof ENTRY }>) {
   const lines = [
-    w.partOfSpeech && `Wortart: ${POS_LABEL[w.partOfSpeech]}`,
+    w.partOfSpeech && `Art: ${POS_LABEL[w.partOfSpeech]}`,
     ...w.definitions.map((d, i) => `Bedeutung ${i + 1}: ${d.text}${d.detail ? ` (${d.detail})` : ""}`),
     ...w.pronunciations.map((p) => `Lautschrift: ${p.ipa}${p.verified ? " (bestätigt)" : ""}`),
     ...w.examples.map((e) => `Beispiel: ${e.text}`),

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headlineSize } from "@/lib/text";
 import { ArrowRight, Plus, Sparkles, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { berlinYear } from "@/lib/time";
@@ -69,7 +70,7 @@ export async function CuratorTasks({ seat }: { seat: number }) {
               <span className="condensed flex h-8 items-center px-4 text-[0.72rem] font-extrabold uppercase tracking-[0.08em]" style={{ background: "var(--band)", color: "var(--band-ink)" }}>
                 {mine[0].kind === "REVIEW" ? "Neubewertung" : "Neu"}
               </span>
-              <span className="display truncate px-4 pt-4 text-[2rem]">{mine[0].word.term}</span>
+              <span className="display line-clamp-3 px-4 pt-4" style={{ fontSize: headlineSize(mine[0].word.term, 2, 1.1) }}>{mine[0].word.term}</span>
             </span>
           </span>
           <span>
@@ -85,7 +86,7 @@ export async function CuratorTasks({ seat }: { seat: number }) {
         <div className="mt-5 flex flex-col gap-4 rounded-[20px] border-2 border-dashed border-line p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="section-title">Alles abgestimmt.</p>
           <Link href="/k/neu" className="btn btn-primary">
-            <Plus size={18} aria-hidden /> Wort hinzufügen
+            <Plus size={18} aria-hidden /> Eintrag hinzufügen
           </Link>
         </div>
       )}

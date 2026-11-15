@@ -19,7 +19,7 @@ export const FORMATS = {
 export type Format = keyof typeof FORMATS;
 export type Order = "az" | "neu" | "kat";
 
-export const COLUMNS = ["Nr", "Wort", "Wortart", "Lautschrift", "Bedeutung", "Beispiele", "Verwendung", "Herkunft", "Kategorien", "Aufgenommen"] as const;
+export const COLUMNS = ["Nr", "Begriff", "Art", "Lautschrift", "Bedeutung", "Beispiele", "Verwendung", "Herkunft", "Kategorien", "Aufgenommen"] as const;
 export type Row = Record<(typeof COLUMNS)[number], string>;
 
 export async function exportRows(db: Db, order: Order, sfw = false): Promise<Row[]> {
@@ -41,8 +41,8 @@ export async function exportRows(db: Db, order: Order, sfw = false): Promise<Row
   });
   const rows = words.map((w) => ({
     Nr: w.cardNumber ? String(w.cardNumber) : "",
-    Wort: w.term,
-    Wortart: w.partOfSpeech ? POS_LABEL[w.partOfSpeech] : "",
+    Begriff: w.term,
+    Art: w.partOfSpeech ? POS_LABEL[w.partOfSpeech] : "",
     Lautschrift: w.pronunciations.map((p) => `[${p.ipa}]`).join(" "),
     Bedeutung: w.definitions.map((d, i) => (w.definitions.length > 1 ? `${i + 1}. ${d.text}` : d.text)).join(" "),
     Beispiele: w.examples.map((e) => e.text).join(" | "),
@@ -53,7 +53,7 @@ export async function exportRows(db: Db, order: Order, sfw = false): Promise<Row
   }));
   if (order === "kat") {
     // Grouped by first category; words without a category last.
-    rows.sort((a, b) => (a.Kategorien || "￿").localeCompare(b.Kategorien || "￿", "de") || a.Wort.localeCompare(b.Wort, "de"));
+    rows.sort((a, b) => (a.Kategorien || "￿").localeCompare(b.Kategorien || "￿", "de") || a.Begriff.localeCompare(b.Begriff, "de"));
   }
   return rows;
 }
@@ -88,16 +88,16 @@ export function render(format: Format, rows: Row[], meta: { exportedAt: string; 
         [
           `-- ${stamp}`,
           `-- ${sig}`,
-          `CREATE TABLE peake_woerter (nr INTEGER, wort TEXT NOT NULL, wortart TEXT, lautschrift TEXT, bedeutung TEXT, beispiele TEXT, verwendung TEXT, herkunft TEXT, kategorien TEXT, aufgenommen DATE);`,
+          `CREATE TABLE peake_woerter (nr INTEGER, begriff TEXT NOT NULL, art TEXT, lautschrift TEXT, bedeutung TEXT, beispiele TEXT, verwendung TEXT, herkunft TEXT, kategorien TEXT, aufgenommen DATE);`,
           ...rows.map(
-            (r) => `INSERT INTO peake_woerter VALUES (${r.Nr || "NULL"}, ${[r.Wort, r.Wortart, r.Lautschrift, r.Bedeutung, r.Beispiele, r.Verwendung, r.Herkunft, r.Kategorien, r.Aufgenommen].map(sqlStr).join(", ")});`,
+            (r) => `INSERT INTO peake_woerter VALUES (${r.Nr || "NULL"}, ${[r.Begriff, r.Art, r.Lautschrift, r.Bedeutung, r.Beispiele, r.Verwendung, r.Herkunft, r.Kategorien, r.Aufgenommen].map(sqlStr).join(", ")});`,
           ),
           "",
         ].join("\n"),
       );
     case "txt":
       return Buffer.from(
-        [stamp, "", ...rows.map((r) => [r.Wort, r.Lautschrift, r.Wortart && `(${r.Wortart})`, r.Bedeutung && `– ${r.Bedeutung}`].filter(Boolean).join(" ")), "", sig, ""].join("\n"),
+        [stamp, "", ...rows.map((r) => [r.Begriff, r.Lautschrift, r.Art && `(${r.Art})`, r.Bedeutung && `– ${r.Bedeutung}`].filter(Boolean).join(" ")), "", sig, ""].join("\n"),
       );
     case "md":
       return Buffer.from(
@@ -106,7 +106,7 @@ export function render(format: Format, rows: Row[], meta: { exportedAt: string; 
           "",
           `_${stamp}_`,
           "",
-          ...rows.map((r) => `- **${r.Wort}**${r.Lautschrift ? ` ${r.Lautschrift}` : ""}${r.Wortart ? ` _${r.Wortart}_` : ""}${r.Bedeutung ? ` — ${r.Bedeutung}` : ""}`),
+          ...rows.map((r) => `- **${r.Begriff}**${r.Lautschrift ? ` ${r.Lautschrift}` : ""}${r.Art ? ` _${r.Art}_` : ""}${r.Bedeutung ? ` — ${r.Bedeutung}` : ""}`),
           "",
           `<sub>${sig}</sub>`,
           "",

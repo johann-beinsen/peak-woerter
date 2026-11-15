@@ -1,5 +1,6 @@
 "use client";
 
+import { isPhrase } from "@/lib/text";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Mic, Plus, Sparkles, Trash2, X } from "lucide-react";
@@ -63,6 +64,7 @@ export function EntryEditor({
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((s) => ({ ...s, [k]: v }));
   const termChanged = f.term.trim().toLowerCase() !== initial.term.trim().toLowerCase();
+  const phrase = isPhrase({ term: f.term, partOfSpeech: f.partOfSpeech });
 
   function insertIpa(ch: string) {
     const el = ipaRefs.current[ipaFocus];
@@ -185,13 +187,13 @@ export function EntryEditor({
           <label htmlFor="term" className="label">
             Begriff
           </label>
-          <input id="term" value={f.term} onChange={(e) => set("term", e.target.value)} className="field display h-16 text-[2rem]" maxLength={120} />
+          <textarea id="term" rows={1} value={f.term} onChange={(e) => set("term", e.target.value.replace(/\s*\n\s*/g, " "))} className="field display field-sizing-content min-h-16 resize-none py-3 text-[2rem] leading-tight" maxLength={200} />
           {termChanged && status === "ACCEPTED" && <p className="hint font-semibold text-no">Startet eine Neubewertung.</p>}
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="pos" className="label">
-              Wortart
+              Art
             </label>
             <select id="pos" value={f.partOfSpeech ?? ""} onChange={(e) => set("partOfSpeech", (e.target.value || null) as Form["partOfSpeech"])} className="field">
               <option value="">– keine Angabe –</option>
@@ -202,12 +204,14 @@ export function EntryEditor({
               ))}
             </select>
           </div>
+          {!phrase && (
           <div>
             <label htmlFor="grammar" className="label">
               Grammatik <span className="font-normal text-ink-3">(optional)</span>
             </label>
             <input id="grammar" value={f.grammar} onChange={(e) => set("grammar", e.target.value)} className="field" placeholder="z. B. maskulin" maxLength={200} />
           </div>
+          )}
         </div>
       </section>
 
@@ -259,6 +263,7 @@ export function EntryEditor({
         </label>
       </section>
 
+      {(!phrase || f.pronunciations.length > 0) && (
       <section aria-labelledby="h-ipa">
         <h2 id="h-ipa" className="section-title">
           Aussprache
@@ -313,6 +318,7 @@ export function EntryEditor({
         )}
         <AddBtn onClick={() => set("pronunciations", [...f.pronunciations, { ipa: "", label: "", verified: true }])}>Aussprache hinzufügen</AddBtn>
       </section>
+      )}
 
       <section aria-labelledby="h-ex">
         <h2 id="h-ex" className="section-title">
@@ -347,9 +353,9 @@ export function EntryEditor({
         </div>
         <div>
           <label htmlFor="variants" className="label">
-            Andere Schreibweisen <span className="font-normal text-ink-3">(mit Komma trennen)</span>
+            Andere Schreibweisen <span className="font-normal text-ink-3">(eine pro Zeile)</span>
           </label>
-          <input id="variants" value={f.variants.join(", ")} onChange={(e) => set("variants", e.target.value.split(",").map((x) => x.trimStart()))} className="field" maxLength={600} />
+          <textarea id="variants" rows={2} value={f.variants.join("\n")} onChange={(e) => set("variants", e.target.value.split("\n").map((x) => x.trimStart()))} className="field field-sizing-content" maxLength={1200} />
         </div>
       </section>
 
@@ -459,11 +465,11 @@ const CONF = { hoch: "sicher", mittel: "eher sicher", niedrig: "unsicher" } as c
 function AiDraftView({ s, categories, onApply, onDiscard }: { s: Suggestion; categories: { name: string }[]; onApply: (field: string) => void; onDiscard: () => void }) {
   const rows: [string, string, React.ReactNode][] = [];
   if (s.shortDefinition) rows.push(["shortDefinition", "Definition", <>{s.shortDefinition}{s.meaning && <span className="block text-ink-2">{s.meaning}</span>}</>]);
-  if (s.partOfSpeech) rows.push(["partOfSpeech", "Wortart", POS_LABEL[s.partOfSpeech]]);
+  if (s.partOfSpeech) rows.push(["partOfSpeech", "Art", POS_LABEL[s.partOfSpeech]]);
   if (s.ipa) rows.push(["ipa", `Lautschrift (${s.ipaConfidence ? CONF[s.ipaConfidence] : "ohne Angabe"})`, <span key="i" className="ipa">{s.ipa}</span>]);
   if (s.example) rows.push(["example", "Beispiel", <span key="e" className="lex-italic">„{s.example}“</span>]);
   if (s.origin) rows.push(["origin", `Herkunft (${s.originConfidence ? CONF[s.originConfidence] : "ohne Angabe"})`, s.origin]);
-  if (s.variants.length) rows.push(["variants", "Schreibweisen", s.variants.join(", ")]);
+  if (s.variants.length) rows.push(["variants", "Schreibweisen", s.variants.join(" · ")]);
   const known = s.categories.filter((n) => categories.some((c) => c.name.toLowerCase() === n.toLowerCase()));
   const unknown = s.categories.filter((n) => !known.includes(n));
   if (known.length) rows.push(["categories", "Kategorien", known.join(", ")]);

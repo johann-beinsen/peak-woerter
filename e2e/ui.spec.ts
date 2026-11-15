@@ -31,14 +31,14 @@ test("Menü: Tippen daneben schließt nur das Menü", async ({ browser }) => {
 test("Entwurf wandert auf ein anderes Gerät", async ({ browser }) => {
   const phone = await (await signedIn(browser)).newPage();
   await phone.goto("/k/neu");
-  await phone.getByPlaceholder("Wort eingeben").fill("Schnickschnack");
+  await phone.getByPlaceholder("Wort oder Spruch eingeben").fill("Schnickschnack");
   await phone.waitForTimeout(2600); // server copy is written after 2 s
 
   const laptop = await (await signedIn(browser)).newPage();
   await laptop.goto("/k/neu");
   await expect(laptop.getByText("Ungespeicherter Entwurf")).toBeVisible();
   await laptop.getByRole("button", { name: "Wiederherstellen" }).click();
-  await expect(laptop.getByPlaceholder("Wort eingeben")).toHaveValue("Schnickschnack");
+  await expect(laptop.getByPlaceholder("Wort oder Spruch eingeben")).toHaveValue("Schnickschnack");
 
   // Submitting removes the draft everywhere.
   await laptop.getByRole("button", { name: "Hinzufügen", exact: true }).click();
@@ -57,7 +57,7 @@ test("Sammlung: Suche grenzt beim Tippen ein, ohne Enter", async ({ browser }) =
   await expect(p).toHaveURL(/woerter\?q=mum$/);
   await expect(p.getByText("Mumpitz", { exact: true })).toBeVisible();
   await field.pressSequentially("x", { delay: 80 });
-  await expect(p.getByText("Keine Wörter gefunden")).toBeVisible();
+  await expect(p.getByText("Nichts gefunden")).toBeVisible();
   await expect(field).toBeFocused(); // typing goes on uninterrupted
   await field.fill("");
   await expect(p).toHaveURL(/\/woerter$/);

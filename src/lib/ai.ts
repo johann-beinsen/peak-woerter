@@ -10,9 +10,9 @@ import { AppError } from "./errors";
 // instead of "hoch", lists as null, overlong text). Normalise instead of rejecting.
 const text = (max: number) =>
   z.preprocess((v) => (typeof v === "string" ? v.trim().slice(0, max) || null : typeof v === "number" ? String(v) : null), z.string().nullable());
-const list = (n: number, max: number) =>
+const list = (n: number, max: number, split: (s: string) => string[] = (s) => s.split(/[,;]/)) =>
   z.preprocess(
-    (v) => (typeof v === "string" ? v.split(/[,;]/) : Array.isArray(v) ? v : []).filter((x): x is string => typeof x === "string" && !!x.trim()).map((x) => x.trim().slice(0, max)).slice(0, n),
+    (v) => (typeof v === "string" ? split(v) : Array.isArray(v) ? v : []).filter((x): x is string => typeof x === "string" && !!x.trim()).map((x) => x.trim().slice(0, max)).slice(0, n),
     z.array(z.string()),
   );
 const oneOf = <T extends string>(values: readonly T[], aliases: Record<string, T> = {}) =>
@@ -22,7 +22,7 @@ const oneOf = <T extends string>(values: readonly T[], aliases: Record<string, T
     return aliases[k] ?? values.find((x) => x.toLowerCase() === k) ?? null;
   }, z.enum(values as [T, ...T[]]).nullable());
 
-const POS = ["SUBSTANTIV", "VERB", "ADJEKTIV", "ADVERB", "INTERJEKTION", "REDEWENDUNG", "SONSTIGES"] as const;
+const POS = ["SUBSTANTIV", "VERB", "ADJEKTIV", "ADVERB", "INTERJEKTION", "REDEWENDUNG", "SPRICHWORT", "SONSTIGES"] as const;
 const CONFIDENCE = ["hoch", "mittel", "niedrig"] as const;
 const confidence = oneOf(CONFIDENCE, { high: "hoch", medium: "mittel", low: "niedrig", mittelhoch: "mittel" });
 
@@ -36,7 +36,8 @@ export const Suggestion = z.object({
   categories: list(5, 40),
   origin: text(600),
   originConfidence: confidence,
-  variants: list(5, 120),
+  // Lines or semicolons separate spellings; a bare comma list is only split when short (sayings contain commas).
+  variants: list(5, 200, (s) => (/[\n;]/.test(s) ? s.split(/[\n;]/) : s.length < 60 ? s.split(",") : [s])),
   caveats: text(600),
 });
 export type Suggestion = z.infer<typeof Suggestion>;
@@ -62,12 +63,13 @@ export interface AiProvider {
 const SYSTEM = `Du hilfst einer kleinen Gruppe von Freunden, ein humorvolles deutsches Wörterbuch zu pflegen.
 Antworte ausschließlich mit einem JSON-Objekt mit diesen Feldern:
 shortDefinition (1–2 prägnante Sätze, darf trocken-humorvoll sein, muss aber verständlich erklären),
-meaning (ausführlicher, optional), partOfSpeech (SUBSTANTIV|VERB|ADJEKTIV|ADVERB|INTERJEKTION|REDEWENDUNG|SONSTIGES),
+meaning (ausführlicher, optional), partOfSpeech (SUBSTANTIV|VERB|ADJEKTIV|ADVERB|INTERJEKTION|REDEWENDUNG|SPRICHWORT|SONSTIGES),
 ipa (IPA ohne Klammern), ipaConfidence (hoch|mittel|niedrig), example (alltäglicher Beispielsatz ohne Anführungszeichen),
 categories (Namen, nur aus der gegebenen Liste), origin, originConfidence (hoch|mittel|niedrig), variants (andere Schreibweisen), caveats.
 Regeln: Erfinde nichts. Wenn du ein Wort nicht kennst (Fantasiewort, Insider), setze Felder auf null und erkläre das in caveats.
 Gibt es eine Beschreibung der Kuratoren, gilt sie als richtig und geht deiner eigenen Deutung vor: Schreibe den Eintrag auf ihrer Grundlage, auch wenn du das Wort nicht kennst. Was sie nicht hergibt, erfinde nicht dazu.
 Bei unsicherer Aussprache ipaConfidence "niedrig". Herkunft nur mit begründeter Annahme, sonst null.
+Ist der Begriff ein Sprichwort oder eine Redewendung (mehrere Wörter): partOfSpeech SPRICHWORT bzw. REDEWENDUNG, ipa und ipaConfidence null, shortDefinition erklärt die übertragene Bedeutung, origin und Verwendung sind hier besonders hilfreich, example zeigt den Spruch im Gespräch.
 Gibt es schon einen Eintrag, ergänze, was fehlt, und verbessere Unklares. Wiederhole Vorhandenes nicht; setze solche Felder auf null.
 Übernimm Ton und Länge der Beispieleinträge, nicht ihren Inhalt.`;
 
@@ -149,7 +151,7 @@ export function parseSuggestion(raw: string): Suggestion {
 export function userPrompt(input: SuggestInput) {
   const cats = input.categories.map((c) => (c.keywords.length ? `${c.name} (Stichwörter: ${c.keywords.slice(0, 8).join(", ")})` : c.name));
   return [
-    `Wort: ${input.term}`,
+    `Begriff: ${input.term}`,
     `Kontext der Einreichung: ${input.context || "keiner"}`,
     input.hint ? `Beschreibung der Kuratoren: ${input.hint}` : "",
     `Bisheriger Eintrag:\n${input.entry || "noch leer"}`,

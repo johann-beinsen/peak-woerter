@@ -1,5 +1,5 @@
 import type { CardData } from "@/components/WordCard";
-import { letterCount } from "./text";
+import { isPhrase, letterCount } from "./text";
 import { formatDate } from "./time";
 
 type EntryLike = {
@@ -21,7 +21,9 @@ type EntryLike = {
  */
 export function toCard(e: EntryLike, opts: { showUnverified?: boolean; bandLabel?: string } = {}): CardData {
   const ipa = e.pronunciations?.find((p) => p.verified) ?? (opts.showUnverified ? e.pronunciations?.[0] : undefined);
-  const values: [string, string | number][] = [["Buchstaben", letterCount(e.term)]];
+  const values: [string, string | number][] = [
+    isPhrase(e) ? ["Wörter", e.term.trim().split(/\s+/).length] : ["Buchstaben", letterCount(e.term)],
+  ];
   if (e.definitions?.length) values.push(["Bedeutungen", e.definitions.length]);
   if (e._count?.rounds) values.push(["Runden", e._count.rounds]);
   if (e.acceptedAt) values.push(["Seit", formatDate(e.acceptedAt, { month: "short", year: "numeric" })]);

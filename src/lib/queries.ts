@@ -29,21 +29,45 @@ export const publicEntrySelect = {
 
 export type PublicEntry = Prisma.WordGetPayload<{ select: typeof publicEntrySelect }>;
 
-export type CollectionQuery = { q?: string; kategorie?: string; sort?: "az" | "neu" | "kat"; sfw?: boolean };
+export type CollectionQuery = { q?: string; kategorie?: string; sort?: "az" | "neu" | "kat"; sfw?: boolean; art?: "wort" | "spruch" };
+
+/** Sayings and idioms: typed as such, or untyped with a space in the term (see isPhrase). */
+export const PHRASE_WHERE: Prisma.WordWhereInput = {
+  OR: [{ partOfSpeech: { in: ["REDEWENDUNG", "SPRICHWORT"] } }, { partOfSpeech: null, term: { contains: " " } }],
+};
+/** The complement, written out: NOT(...) would drop rows where partOfSpeech is NULL (SQL three-valued logic). */
+export const SINGLE_WHERE: Prisma.WordWhereInput = {
+  AND: [
+    { OR: [{ partOfSpeech: null }, { partOfSpeech: { notIn: ["REDEWENDUNG", "SPRICHWORT"] } }] },
+    { OR: [{ partOfSpeech: { not: null } }, { term: { not: { contains: " " } } }] },
+  ],
+};
 
 export async function listPublicWords(db: Db, query: CollectionQuery) {
   const q = query.q ? normalizeTerm(query.q) : "";
+  // Every word of the query must occur (any order, punctuation ignored): "bären aufbinden" finds
+  // "jemandem einen Bären aufbinden". The whole query may also be an exact variant spelling.
+  const tokens = q.split(" ").filter(Boolean);
   const where: Prisma.WordWhereInput = {
     ...publicWhere(query.sfw),
-    ...(q
+    ...(tokens.length
       ? {
           OR: [
-            { normalized: { contains: q } },
             { variants: { has: query.q!.trim() } },
-            { definitions: { some: { text: { contains: q, mode: "insensitive" } } } },
+            {
+              AND: tokens.map((t) => ({
+                OR: [
+                  { normalized: { contains: t } },
+                  { definitions: { some: { text: { contains: t, mode: "insensitive" as const } } } },
+                  { examples: { some: { text: { contains: t, mode: "insensitive" as const } } } },
+                  { origin: { contains: t, mode: "insensitive" as const } },
+                ],
+              })),
+            },
           ],
         }
       : {}),
+    ...(query.art === "spruch" ? { AND: [PHRASE_WHERE] } : query.art === "wort" ? { AND: [SINGLE_WHERE] } : {}),
     ...(query.kategorie ? { categories: { some: { category: { slug: query.kategorie } } } } : {}),
   };
   return db.word.findMany({

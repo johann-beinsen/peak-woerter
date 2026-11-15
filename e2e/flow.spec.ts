@@ -72,12 +72,12 @@ test("Wort in Sekunden einreichen, Duplikat wird erkannt", async () => {
   const p = await anna.newPage();
   await p.goto("/k/neu");
   await shot(p, "02-neu");
-  await p.getByPlaceholder("Wort eingeben").fill("Mumpitz");
+  await p.getByPlaceholder("Wort oder Spruch eingeben").fill("Mumpitz");
   await p.getByRole("button", { name: "Hinzufügen", exact: true }).click();
   await expect(p.getByRole("status")).toContainText("„Mumpitz“ hinzugefügt");
-  await p.getByPlaceholder("Wort eingeben").fill("  mumpitz ");
+  await p.getByPlaceholder("Wort oder Spruch eingeben").fill("  mumpitz ");
   await expect(p.locator("#dup")).toContainText("steht schon zur Abstimmung");
-  await p.getByPlaceholder("Wort eingeben").fill("Firlefanz");
+  await p.getByPlaceholder("Wort oder Spruch eingeben").fill("Firlefanz");
   await p.getByRole("button", { name: "Hinzufügen", exact: true }).click();
   await expect(p.getByRole("status")).toContainText("Firlefanz");
 });
@@ -191,7 +191,7 @@ test("Nachschlagen: Startseite, Suche, Kategorie", async () => {
   await v.getByText("Mumpitz", { exact: true }).click();
   await expect(v.getByRole("link", { name: /Ganzer Eintrag/ })).toBeVisible();
   await v.goto("/woerter?q=gibtsnicht");
-  await expect(v.getByText("Keine Wörter gefunden")).toBeVisible();
+  await expect(v.getByText("Nichts gefunden")).toBeVisible();
 
   const a = await anna.newPage();
   await a.goto("/k/kategorien");

@@ -17,7 +17,7 @@ export function AddWordForm() {
   const dirty = !!(term.trim() || note.trim());
   const draft = useDraft("neu", { term, note }, dirty);
   const formRef = useRef<HTMLFormElement>(null);
-  const termRef = useRef<HTMLInputElement>(null);
+  const termRef = useRef<HTMLTextAreaElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
@@ -58,19 +58,26 @@ export function AddWordForm() {
       )}
       <div>
         <label htmlFor="term" className="sr-only">
-          Wort
+          Wort oder Spruch
         </label>
-        <input
+        <textarea
           ref={termRef}
           id="term"
           name="term"
+          rows={1}
           required
-          maxLength={120}
+          maxLength={200}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              e.currentTarget.form?.requestSubmit();
+            }
+          }}
           autoFocus
           autoComplete="off"
           autoCapitalize="sentences"
           enterKeyHint="send"
-          placeholder="Wort eingeben"
+          placeholder="Wort oder Spruch eingeben"
           aria-invalid={dup ? true : undefined}
           aria-describedby="dup"
           value={term}
@@ -78,7 +85,7 @@ export function AddWordForm() {
             setTerm(e.target.value);
             onTerm(e.target.value);
           }}
-          className="field display h-20 text-[2.25rem] placeholder:font-normal placeholder:text-[1.4rem]"
+          className="field display field-sizing-content min-h-20 resize-none py-4 text-[2.25rem] leading-tight placeholder:font-normal placeholder:text-[1.4rem]"
         />
         <p id="dup" aria-live="polite" className="mt-2 min-h-6 text-[0.95rem] font-medium text-no">
           {dup?.message}

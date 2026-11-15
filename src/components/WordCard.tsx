@@ -15,10 +15,12 @@ export type CardData = {
   values?: [string, string | number][];
 };
 
-/** Fits long German compounds: font size shrinks with length, floor 2rem. */
-function termSize(term: string, max: number) {
-  const len = Math.max(letterCount(term), 5);
-  return `clamp(1.6rem, ${Math.round(168 / len)}cqi, ${max}rem)`;
+/** Fits long compounds (longest word) and long sayings (total length): shrinks, floor 1.6rem. */
+function termSize(term: string, max: number, min = 1.6) {
+  const longest = Math.max(...term.split(/\s+/).map((w) => letterCount(w)), 5);
+  const total = Math.max(letterCount(term), 5);
+  const cqi = Math.min(168 / longest, 70 / Math.sqrt(total));
+  return `clamp(${min}rem, ${cqi.toFixed(1)}cqi, ${max}rem)`;
 }
 
 export function Ipa({ ipa, verified, className = "" }: { ipa: string; verified: boolean; className?: string }) {
@@ -111,7 +113,7 @@ export function MiniCard({ term, cardNumber, band, definition }: Pick<CardData, 
         {no && <span className="condensed tabular text-[0.72rem] font-black">{no}</span>}
       </div>
       <div className="flex flex-1 flex-col p-3.5">
-        <span lang="de" className="display hyphens-auto break-words" style={{ fontSize: termSize(term, 2.2).replace("2rem", "1.35rem") }}>
+        <span lang="de" className="display hyphens-auto break-words" style={{ fontSize: termSize(term, 2.2, 1.2) }}>
           {term}
         </span>
         {definition && <span className="mt-2 line-clamp-3 text-[0.86rem] leading-snug text-card-ink-2">{definition}</span>}

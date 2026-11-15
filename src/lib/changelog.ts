@@ -10,6 +10,15 @@ export type Release = { version: string; date: string; items: ChangeItem[] };
 
 export const CHANGELOG: Release[] = [
   {
+    version: "1.4.0",
+    date: "2026-11-15",
+    items: [
+      { title: "Sprichwörter", text: "Sprüche und Redewendungen haben jetzt eine eigene Art, lange Einträge werden auf Karten und Seiten nicht mehr abgeschnitten und dürfen bis zu 200 Zeichen lang sein. Lautschrift und Grammatik entfallen bei ihnen.", href: "/woerter?art=spruch" },
+      { title: "Bessere Suche", text: "Die Suche findet alle Wörter einer Eingabe in beliebiger Reihenfolge und ignoriert Kommas: „Bären aufbinden“ findet „jemandem einen Bären aufbinden“. Auch ein anderes Komma meldet jetzt eine Dublette." },
+      { title: "Sammlung nach Art", text: "In der Sammlung lassen sich Wörter und Sprichwörter getrennt anzeigen." },
+    ],
+  },
+  {
     version: "1.3.0",
     date: "2026-11-14",
     items: [

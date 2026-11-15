@@ -20,8 +20,9 @@ services:
     networks: [internal]
 
   app:
-    image: peake-woerter:latest
+    # Built locally from this repo: no registry image, so "pull" (Portainer re-pull) has nothing to fetch.
     build: .
+    pull_policy: build
     restart: unless-stopped
     depends_on:
       db:

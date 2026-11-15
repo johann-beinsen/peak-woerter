@@ -19,7 +19,7 @@ export const GAMES = {
   bedeutung: { title: "Echt oder erfunden?", description: "Fünf Wörter, je vier Bedeutungen. Nur eine gehört wirklich dazu." },
   sudoku: { title: "Buchstaben-Sudoku", description: "Ein Sudoku aus den Buchstaben eines Archivworts. Gelöst steht das Wort in der markierten Zeile." },
   pfad: { title: "Pfad", description: "Verbinde die Zahlen der Reihe nach mit einer Linie, die jedes Feld genau einmal besucht. Die Zeit läuft." },
-  satz: { title: "Satzbau", description: "Ein Wort aus dem Archiv, ein glaubwürdiger Satz damit. Morgen wird abgestimmt." },
+  satz: { title: "Satzbau", description: "Ein Eintrag aus dem Archiv, ein glaubwürdiger Satz damit. Morgen wird abgestimmt." },
 } as const;
 export type GameKey = keyof typeof GAMES;
 export const isGame = (k: string): k is GameKey => k in GAMES;

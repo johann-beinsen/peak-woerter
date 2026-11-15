@@ -34,7 +34,7 @@ export default async function Spaeter() {
               <li key={w.id} className="border-t border-line">
                 <Link href={`/k/wort/${w.id}`} className="group block py-5">
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="display text-[2rem] group-hover:underline decoration-2 underline-offset-4">{w.term}</span>
+                    <span className="display text-[1.5rem] sm:text-[2rem] group-hover:underline decoration-2 underline-offset-4">{w.term}</span>
                     <span className="shrink-0 text-sm text-ink-3">seit {formatDate(w.createdAt, { day: "numeric", month: "short" })}</span>
                   </div>
                   {w.definitions[0] && <p className="mt-1 text-ink-2">{w.definitions[0].text}</p>}
