@@ -6,6 +6,8 @@ import { requireMemberPage } from "@/lib/access";
 import { can } from "@/lib/permissions";
 import type { Prisma } from "@/generated/prisma/client";
 import { BulkTagger, RetagButton } from "./client";
+import { SINGLE_WHERE } from "@/lib/queries";
+import { isPhrase } from "@/lib/text";
 
 export const metadata: Metadata = { title: "Datenbank pflegen", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -15,7 +17,7 @@ const GAPS = {
   beschreibung: { label: "ohne Beschreibung", where: { definitions: { none: {} } } },
   kategorie: { label: "ohne Kategorie", where: { categories: { none: {} } } },
   wortart: { label: "ohne Wortart", where: { partOfSpeech: null } },
-  lautschrift: { label: "ohne Lautschrift", where: { pronunciations: { none: {} } } },
+  lautschrift: { label: "ohne Lautschrift", where: { pronunciations: { none: {} }, AND: [SINGLE_WHERE] } },
   unbestaetigt: { label: "Lautschrift unbestätigt", where: { pronunciations: { some: { verified: false } } } },
   beispiel: { label: "ohne Beispiel", where: { examples: { none: {} } } },
   herkunft: { label: "ohne Herkunft", where: { origin: null } },
@@ -89,7 +91,7 @@ export default async function Pflege({ searchParams }: { searchParams: Promise<{
             !w._count.definitions && "Beschreibung",
             !w.categories.length && "Kategorie",
             !w.partOfSpeech && "Wortart",
-            !w._count.pronunciations && "Lautschrift",
+            !w._count.pronunciations && !isPhrase(w) && "Lautschrift",
             !w._count.examples && "Beispiel",
             !w.origin && "Herkunft",
           ].filter((x): x is string => !!x),

@@ -20,6 +20,7 @@ export const POS_LABEL = {
   ADVERB: "Adverb",
   INTERJEKTION: "Interjektion",
   REDEWENDUNG: "Redewendung",
+  SPRICHWORT: "Sprichwort",
   SONSTIGES: "Sonstiges",
 } as const;
 

@@ -2,6 +2,7 @@
 // belong to other words (of the same part of speech where possible).
 import { z } from "zod";
 import { AppError } from "../errors";
+import { isPhrase } from "../text";
 import { fresh, shuffle, type PuzzleKind } from "./types";
 
 export const QUESTIONS = 5;
@@ -29,8 +30,11 @@ export const bedeutung: PuzzleKind<P, S, BedeutungView> = {
     if (targets.length < QUESTIONS) targets.push(...shuffle(unique.filter((w) => !targets.includes(w)), rand).slice(0, QUESTIONS - targets.length));
     const questions = targets.map((w) => {
       const others = shuffle(unique.filter((x) => x.id !== w.id), rand);
-      const same = others.filter((x) => x.partOfSpeech && x.partOfSpeech === w.partOfSpeech);
-      const decoys = [...same, ...others.filter((x) => !same.includes(x))].slice(0, 3).map((x) => x.definition!);
+      // Decoys of the same kind: sayings explain themselves differently from single words.
+      const kind = others.filter((x) => isPhrase(x) === isPhrase(w));
+      const same = kind.filter((x) => x.partOfSpeech && x.partOfSpeech === w.partOfSpeech);
+      const near = [...same, ...kind.filter((x) => !same.includes(x))];
+      const decoys = [...near, ...others.filter((x) => !near.includes(x))].slice(0, 3).map((x) => x.definition!);
       const options = shuffle([w.definition!, ...decoys], rand);
       return { term: w.term, slug: w.slug, options, correct: options.indexOf(w.definition!) };
     });

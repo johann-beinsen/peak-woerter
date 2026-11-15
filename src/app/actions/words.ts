@@ -40,7 +40,7 @@ export async function retractVoteAction(wordId: string) {
 }
 
 const Submit = z.object({
-  term: z.string().trim().min(1, "Bitte ein Wort eingeben.").max(120, "Das ist zu lang für ein Wort (max. 120 Zeichen)."),
+  term: z.string().trim().min(1, "Bitte ein Wort oder einen Spruch eingeben.").max(200, "Das ist zu lang (max. 200 Zeichen)."),
   note: z.string().trim().max(1000).optional(),
   voteYes: z.boolean(),
 });
@@ -80,12 +80,12 @@ export async function commentAction(wordId: string, _: unknown, fd: FormData) {
 }
 
 const Entry = z.object({
-  term: z.string().trim().min(1).max(120),
-  partOfSpeech: z.enum(["SUBSTANTIV", "VERB", "ADJEKTIV", "ADVERB", "INTERJEKTION", "REDEWENDUNG", "SONSTIGES"]).nullable(),
+  term: z.string().trim().min(1).max(200),
+  partOfSpeech: z.enum(["SUBSTANTIV", "VERB", "ADJEKTIV", "ADVERB", "INTERJEKTION", "REDEWENDUNG", "SPRICHWORT", "SONSTIGES"]).nullable(),
   grammar: z.string().max(200).nullable(),
   usage: z.string().max(2000).nullable(),
   origin: z.string().max(2000).nullable(),
-  variants: z.array(z.string().max(120)).max(20),
+  variants: z.array(z.string().max(200)).max(20),
   definitions: z.array(z.object({ text: z.string().max(600), detail: z.string().max(2000).nullable() })).max(12),
   pronunciations: z.array(z.object({ ipa: z.string().max(120), label: z.string().max(80).nullable(), verified: z.boolean() })).max(8),
   examples: z.array(z.string().max(600)).max(10),

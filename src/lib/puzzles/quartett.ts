@@ -3,6 +3,7 @@
 // one solution. Four mistakes end the game.
 import { z } from "zod";
 import { AppError } from "../errors";
+import { isPhrase } from "../text";
 import { shuffle, type PoolWord, type PuzzleKind } from "./types";
 
 export const MAX_MISTAKES = 4;
@@ -19,7 +20,8 @@ export type QuartettView = {
   last: Feedback;
 };
 
-function build(words: PoolWord[], rand: () => number): P | null {
+function build(all: PoolWord[], rand: () => number): P | null {
+  const words = all.filter((w) => !isPhrase(w)); // a saying among single words is a giveaway
   const byCat = new Map<string, { name: string; color: string; words: PoolWord[] }>();
   for (const w of words)
     for (const c of w.categories) {

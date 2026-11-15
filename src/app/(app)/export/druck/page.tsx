@@ -30,10 +30,10 @@ export default async function Druck({ searchParams }: { searchParams: Promise<{ 
       </p>
       <ol className="mt-6">
         {rows.map((r) => (
-          <li key={r.Wort} className="break-inside-avoid border-b border-line py-2">
+          <li key={r.Begriff} className="break-inside-avoid border-b border-line py-2">
             <p>
-              <strong className="display text-lg">{r.Wort}</strong> {r.Lautschrift && <span className="font-lex text-ink-2">{r.Lautschrift}</span>}{" "}
-              {r.Wortart && <em className="text-ink-2">{r.Wortart}</em>}
+              <strong className="display text-lg">{r.Begriff}</strong> {r.Lautschrift && <span className="font-lex text-ink-2">{r.Lautschrift}</span>}{" "}
+              {r.Art && <em className="text-ink-2">{r.Art}</em>}
             </p>
             {r.Bedeutung && <p className="text-[0.95rem]">{r.Bedeutung}</p>}
             {r.Kategorien && <p className="text-xs text-ink-3">{r.Kategorien}</p>}

@@ -187,7 +187,7 @@ export function SwipeDeck({ initial }: { initial: DeckItem[] }) {
               <p className="display text-5xl uppercase">Stapel leer.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 <Link href="/k/neu" className="btn btn-primary">
-                  <Plus size={18} aria-hidden /> Wort hinzufügen
+                  <Plus size={18} aria-hidden /> Eintrag hinzufügen
                 </Link>
                 <Link href="/" className="btn btn-quiet">
                   Zur Startseite

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headlineSize } from "@/lib/text";
 import type { Metadata } from "next";
 import { Trophy } from "lucide-react";
 import { db } from "@/lib/db";
@@ -58,7 +59,7 @@ export default async function Spiele() {
             Dein Wort
           </p>
           <div className="px-5 py-5 text-[var(--card-ink)]">
-            <p className="display text-[2.4rem]">{word?.isPublic ? <Link href={`/wort/${word.slug}`}>{word.term}</Link> : word?.term}</p>
+            <p className="display" style={{ fontSize: headlineSize(word?.term ?? "", 2.4, 1.4) }}>{word?.isPublic ? <Link href={`/wort/${word.slug}`}>{word.term}</Link> : word?.term}</p>
             {word?.definitions[0] && <p className="mt-1 text-[var(--card-ink-2)]">{word.definitions[0].text}</p>}
           </div>
         </div>

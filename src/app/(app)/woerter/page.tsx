@@ -2,18 +2,18 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { LayoutGrid, List, Search, X } from "lucide-react";
 import { db } from "@/lib/db";
-import { listPublicWords, publicCategories } from "@/lib/queries";
+import { listPublicWords, publicCategories, publicWhere, PHRASE_WHERE } from "@/lib/queries";
 import { bandClass } from "@/lib/categories";
 import { MiniCard } from "@/components/WordCard";
 import { EntryRow } from "@/components/EntryRow";
 import { sfwOn } from "@/lib/sfw";
-import { normalizeTerm } from "@/lib/text";
+import { isPhrase, normalizeTerm } from "@/lib/text";
 import { LiveSearch } from "./LiveSearch";
 
 export const metadata: Metadata = { title: "Sammlung" };
 export const dynamic = "force-dynamic";
 
-type SP = Promise<{ q?: string; kategorie?: string; sort?: string; ansicht?: string }>;
+type SP = Promise<{ q?: string; kategorie?: string; sort?: string; ansicht?: string; art?: string }>;
 
 function initial(term: string) {
   const c = term.normalize("NFD").replace(/[̀-ͯ]/g, "").charAt(0).toUpperCase();
@@ -26,11 +26,17 @@ export default async function Sammlung({ searchParams }: { searchParams: SP }) {
   const view = sp.ansicht === "karten" ? "karten" : "liste";
   const q = sp.q?.slice(0, 100);
   const sfw = await sfwOn();
-  const [words, cats] = await Promise.all([listPublicWords(db, { q, kategorie: sp.kategorie, sort, sfw }), publicCategories(db, sfw)]);
+  const art = sp.art === "wort" || sp.art === "spruch" ? sp.art : undefined;
+  const [words, cats, nSprueche, nAlle] = await Promise.all([
+    listPublicWords(db, { q, kategorie: sp.kategorie, sort, sfw, art }),
+    publicCategories(db, sfw),
+    db.word.count({ where: { AND: [publicWhere(sfw), PHRASE_WHERE] } }),
+    db.word.count({ where: publicWhere(sfw) }),
+  ]);
 
   const href = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams();
-    const merged = { q, kategorie: sp.kategorie, sort: sort === "az" ? undefined : sort, ansicht: view === "liste" ? undefined : view, ...patch };
+    const merged = { q, kategorie: sp.kategorie, art, sort: sort === "az" ? undefined : sort, ansicht: view === "liste" ? undefined : view, ...patch };
     for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
     const s = p.toString();
     return s ? `/woerter?${s}` : "/woerter";
@@ -38,19 +44,21 @@ export default async function Sammlung({ searchParams }: { searchParams: SP }) {
 
   const groups = new Map<string, typeof words>();
   const add = (k: string, w: (typeof words)[number]) => groups.set(k, [...(groups.get(k) ?? []), w]);
-  if (sort === "az") for (const w of words) add(initial(w.term), w);
+  const PHRASES = "Sprichwörter & Redewendungen";
+  // In the mixed view, sayings get their own group instead of piling up under D, W and J.
+  if (sort === "az") for (const w of words) add(!art && isPhrase(w) ? PHRASES : initial(w.term), w);
   if (sort === "kat") {
     for (const w of words) for (const c of w.categories.length ? w.categories.map((c) => c.category.name) : ["Ohne Kategorie"]) add(c, w);
   }
-  const grouped = sort === "neu" ? [["", words] as const] : [...groups.entries()].sort(([a], [b]) => (sort === "kat" ? a.localeCompare(b, "de") : 0));
+  const grouped = sort === "neu" ? [["", words] as const] : [...groups.entries()].sort(([a], [b]) => (sort === "kat" ? a.localeCompare(b, "de") : Number(a === PHRASES) - Number(b === PHRASES)));
 
   return (
     <div className="mx-auto max-w-6xl px-4 pt-6 md:px-6 md:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="page-title">Sammlung</h1>
         <p className="tabular text-sm text-ink-2">
-          {words.length} {words.length === 1 ? "Wort" : "Wörter"}
-          
+          {nAlle - nSprueche} {nAlle - nSprueche === 1 ? "Wort" : "Wörter"}
+          {nSprueche > 0 && ` · ${nSprueche} ${nSprueche === 1 ? "Spruch" : "Sprüche"}`}
         </p>
       </div>
 
@@ -58,6 +66,7 @@ export default async function Sammlung({ searchParams }: { searchParams: SP }) {
         {sp.kategorie && <input type="hidden" name="kategorie" value={sp.kategorie} />}
         {sort !== "az" && <input type="hidden" name="sort" value={sort} />}
         {view !== "liste" && <input type="hidden" name="ansicht" value={view} />}
+        {art && <input type="hidden" name="art" value={art} />}
         <label htmlFor="suche" className="sr-only">
           Suchen
         </label>
@@ -66,6 +75,16 @@ export default async function Sammlung({ searchParams }: { searchParams: SP }) {
           <Search size={20} strokeWidth={2.4} aria-hidden />
         </button>
       </form>
+
+      {nSprueche > 0 && (
+        <nav aria-label="Art" className="mt-4 flex flex-wrap gap-2">
+          {([[undefined, "Alles"], ["wort", "Wörter"], ["spruch", "Sprichwörter"]] as const).map(([v, label]) => (
+            <Link key={label} href={href({ art: v })} className="chip" aria-current={art === v ? "true" : undefined}>
+              {label}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 md:flex-nowrap">
         <nav aria-label="Kategorien" className="-mx-4 flex w-[calc(100%+2rem)] flex-nowrap gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:w-auto md:min-w-0 md:flex-1 md:flex-wrap md:px-0">
@@ -109,8 +128,8 @@ export default async function Sammlung({ searchParams }: { searchParams: SP }) {
 
       {words.length === 0 ? (
         <div className="mt-16 max-w-md">
-          <p className="section-title">{q || sp.kategorie ? "Keine Wörter gefunden" : "Noch keine Wörter"}</p>
-          {(q || sp.kategorie) && (
+          <p className="section-title">{q || sp.kategorie || art ? "Nichts gefunden" : "Noch keine Einträge"}</p>
+          {(q || sp.kategorie || art) && (
             <Link href="/woerter" className="btn btn-quiet mt-5">
               <X size={18} aria-hidden /> Filter zurücksetzen
             </Link>
@@ -120,7 +139,7 @@ export default async function Sammlung({ searchParams }: { searchParams: SP }) {
         <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {words.map((w) => (
             <li key={w.id}>
-              <Link href={`/wort/${w.slug}`} className="group block h-48 rounded-[20px]">
+              <Link href={`/wort/${w.slug}`} className={`group block rounded-[20px] ${isPhrase(w) ? "h-64" : "h-48"}`}>
                 <MiniCard term={w.term} cardNumber={w.cardNumber} band={w.categories[0]?.category} definition={w.definitions[0]?.text} />
               </Link>
             </li>

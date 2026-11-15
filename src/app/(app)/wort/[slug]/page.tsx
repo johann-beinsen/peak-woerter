@@ -17,6 +17,7 @@ import { WordCard, Ipa } from "@/components/WordCard";
 import { ShareButton } from "@/components/ShareButton";
 import { cardImagePath, shareUrl } from "@/lib/share";
 import { AudioButton } from "@/components/AudioButton";
+import { headlineSize } from "@/lib/text";
 
 type P = { params: Promise<{ slug: string }> };
 
@@ -74,7 +75,7 @@ export default async function WordPage({ params }: P) {
       <div className="mt-5 grid gap-12 md:grid-cols-[minmax(0,1fr)_18rem] md:gap-16">
         <article>
           <header>
-            <h1 lang="de" className="display hyphens-auto break-words text-[clamp(2.75rem,10vw,4.75rem)]">
+            <h1 lang="de" className="display hyphens-auto break-words leading-[1.02]" style={{ fontSize: headlineSize(w.term) }}>
               {w.term}
             </h1>
             {(pos || pron.length > 0) && (
@@ -89,7 +90,7 @@ export default async function WordPage({ params }: P) {
                 ))}
               </div>
             )}
-            {w.variants.length > 0 && <p className="mt-2 text-ink-2">auch: {w.variants.join(", ")}</p>}
+            {w.variants.length > 0 && <p className="mt-2 text-ink-2">auch: {w.variants.join(" · ")}</p>}
           </header>
 
           {/* Dictionary setting: numbered senses, examples run in, run-in heads. */}
@@ -151,7 +152,7 @@ export default async function WordPage({ params }: P) {
             )}
             {related.length > 0 && (
               <p className="mt-6 leading-relaxed">
-                <strong className="font-bold">Ähnliche Wörter:</strong>{" "}
+                <strong className="font-bold">Ähnliche Einträge:</strong>{" "}
                 {related.map((r, i) => (
                   <span key={r.slug}>
                     {i > 0 && ", "}
@@ -184,7 +185,7 @@ export default async function WordPage({ params }: P) {
               fallbackImage={cardImagePath(w.slug)}
             />
             <Link href="/zufall" className="btn btn-quiet btn-sm">
-              <Shuffle size={18} aria-hidden /> Zufälliges Wort
+              <Shuffle size={18} aria-hidden /> Zufälliger Eintrag
             </Link>
             {can(viewer, "edit") && (
               <Link href={`/k/wort/${w.id}/bearbeiten`} className="btn btn-quiet btn-sm">

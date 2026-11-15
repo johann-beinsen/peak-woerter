@@ -63,7 +63,7 @@ const Word = z.object({
   term: str(200).min(1),
   status: z.enum(["VOTING", "LATER", "ACCEPTED", "REJECTED"]),
   cardNumber: z.number().int().positive().nullish(),
-  partOfSpeech: z.enum(["SUBSTANTIV", "VERB", "ADJEKTIV", "ADVERB", "INTERJEKTION", "REDEWENDUNG", "SONSTIGES"]).nullish(),
+  partOfSpeech: z.enum(["SUBSTANTIV", "VERB", "ADJEKTIV", "ADVERB", "INTERJEKTION", "REDEWENDUNG", "SPRICHWORT", "SONSTIGES"]).nullish(),
   grammar: opt(300),
   usage: opt(5000),
   origin: opt(5000),

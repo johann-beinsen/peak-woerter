@@ -205,9 +205,9 @@ describe("Export", () => {
     await accepted("=Formel");
     await submitWord(db, { term: "Geheim", userId: u.a }); // still voting: never exported
     const rows = await exportRows(db, "az");
-    expect(rows.map((r) => r.Wort)).toEqual(["=Formel"]);
+    expect(rows.map((r) => r.Begriff)).toEqual(["=Formel"]);
     const at = "2026-10-19T10:00:00.000Z";
-    expect(sign(at, rows)).not.toBe(sign(at, [{ ...rows[0], Wort: "x" }]));
+    expect(sign(at, rows)).not.toBe(sign(at, [{ ...rows[0], Begriff: "x" }]));
     const csv = render("csv", rows, { exportedAt: at, signature: "abc", by: "Anna" }).toString();
     expect(csv).toContain(`"'=Formel"`);
     expect(csv).toContain("Signatur");

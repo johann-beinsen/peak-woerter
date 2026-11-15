@@ -225,6 +225,6 @@ export async function openInitialRound(tx: Tx, wordId: string, userId: string | 
   const round = await tx.votingRound.create({ data: { wordId, number: 1, kind: "INITIAL", openedById: userId, deadline: await deadline(tx) } });
   if (opts.quiet) return round;
   const { term } = await tx.word.findUniqueOrThrow({ where: { id: wordId }, select: { term: true } });
-  await notifyCurators(tx, userId, { wordId, kind: "runde", body: `Neues Wort zur Abstimmung: „${term}“`, href: "/k/abstimmen" });
+  await notifyCurators(tx, userId, { wordId, kind: "runde", body: `Neuer Eintrag zur Abstimmung: „${term}“`, href: "/k/abstimmen" });
   return round;
 }

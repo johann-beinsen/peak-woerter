@@ -1,7 +1,7 @@
 import type { Db, Tx } from "./db";
 import { AppError } from "./errors";
 import { audit } from "./audit";
-import { cleanIpa, cleanTerm, normalizeTerm, slugify } from "./text";
+import { cleanIpa, cleanTerm, guessPartOfSpeech, normalizeTerm, slugify } from "./text";
 import { castVote, openInitialRound, openRound } from "./voting";
 import { autoTag } from "./tagging";
 import { notify } from "./notifications";
@@ -40,7 +40,7 @@ export async function submitWord(
   input: { term: string; note?: string | null; userId: string; voteYes?: boolean },
 ) {
   const term = cleanTerm(input.term);
-  if (!term) throw new AppError("Bitte ein Wort eingeben.");
+  if (!term) throw new AppError("Bitte ein Wort oder einen Spruch eingeben.");
   const seat = await db.curatorSeat.findUnique({ where: { userId: input.userId } });
   if (!seat) throw new AppError("Nur für Kuratoren.", 403);
 
@@ -52,6 +52,7 @@ export async function submitWord(
         term,
         normalized: normalizeTerm(term),
         slug: await uniqueSlug(tx, term),
+        partOfSpeech: guessPartOfSpeech(term), // sayings are typed right away; curators can change it
         submissionNote: input.note?.trim() || null,
         submittedById: input.userId,
         source: "CURATOR",

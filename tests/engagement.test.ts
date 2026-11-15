@@ -40,7 +40,7 @@ const sub = (userId: string, name: string) => subscribe(db, userId, { endpoint: 
 describe("Nachrichten zu Ereignissen", () => {
   it("neue Abstimmung für die anderen Kuratoren, Aufnahme für die einreichende Person", async () => {
     const w = await accepted("Mümpitz");
-    expect(await inbox(u.b)).toEqual([{ kind: "runde", body: "Neues Wort zur Abstimmung: „Mümpitz“" }]);
+    expect(await inbox(u.b)).toEqual([{ kind: "runde", body: "Neuer Eintrag zur Abstimmung: „Mümpitz“" }]);
     expect(await inbox(u.a)).toEqual([{ kind: "aufgenommen", body: "„Mümpitz“ ist jetzt in der Sammlung (№ 001)." }]);
     expect(await inbox(u.outsider)).toEqual([]);
     expect(w.term).toBe("Mümpitz");
